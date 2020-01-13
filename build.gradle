@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id "application"
+    id "idea"
+    id "com.github.sherter.google-java-format" version "0.8"
+}
+
+group 'com.jrepp'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+def versions = [
+    'junit'     : '5.5.2',
+    'truth'     : '1.0',
+    'guava'     : '28.2-jre',
+]
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.junit}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.junit}"
+    testImplementation "com.google.truth:truth:${versions.truth}"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${versions.junit}"
+    implementation "org.junit.jupiter:junit-jupiter:${versions.junit}"
+    implementation "com.google.guava:guava:${versions.guava}"
+}
+
+mainClassName = 'com.jrepp.SodokuSolver'
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava.dependsOn "googleJavaFormat"
