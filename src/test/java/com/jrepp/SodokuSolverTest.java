@@ -162,7 +162,7 @@ public class SodokuSolverTest {
   @Test
   void testSolveEasy() throws Exception {
     board.parseCSV(EASY_1);
-    boolean solved = board.solve(false);
+    boolean solved = board.solve(SodokuSolver.Trace.none());
     assertThat(solved).isTrue();
     board.print();
   }
@@ -170,14 +170,14 @@ public class SodokuSolverTest {
   @Test
   void testSolveMedium() throws Exception {
     board.parseCSV(MEDIUM_1);
-    boolean solved = board.solve(false);
+    boolean solved = board.solve(SodokuSolver.Trace.none());
     assertThat(solved).isTrue();
   }
 
   @Test
   void testSolveEvil() throws Exception {
     board.parseCSV(EVIL_1);
-    boolean solved = board.solve(true);
+    boolean solved = board.solve(SodokuSolver.Trace.summary());
     assertThat(solved).isTrue();
   }
 }

@@ -53,14 +53,32 @@ public class SodokuSolver {
     }
 
     // Write solver here
-    public boolean solve(boolean trace) {
-      boolean canSolve = true;
+    public boolean solve(Trace trace) {
+      trace.emptyCells = Board.COLS * Board.ROWS - population.cardinality();
+      boolean result = innerSolve(trace);
+      if (trace.enableSummary) {
+        System.out.println(
+            "[solve] result: "
+                + result
+                + ", empty: "
+                + trace.emptyCells
+                + ", valid-guesses: "
+                + trace.validGuesses
+                + ", invalid-guesses: "
+                + trace.invalidGuesses);
+      }
+      return result;
+    }
+
+    public boolean innerSolve(Trace trace) {
       CellPos pos = new CellPos(0, 0, false, 0);
 
       // Find the next valid position to solve
       findSolvePosition(pos);
       if (!pos.valid) {
-        System.out.println("[solve] no valid positions");
+        if (trace.enablePrinting) {
+          System.out.println("[solve] no valid positions");
+        }
         return false;
       }
 
@@ -79,10 +97,9 @@ public class SodokuSolver {
             continue;
           }
 
-          BitSet inUse = allInUseAt(col, row);
-
           // Find the cell with the highest number of known values,
           // that still has a 0 (empty cell)
+          final BitSet inUse = allInUseAt(col, row);
           final int cardinality = inUse.cardinality();
           if (cardinality > bestCardinality && cardinality < TOTAL_CARDINALITY && inUse.get(0)) {
             bestCardinality = cardinality;
@@ -96,35 +113,39 @@ public class SodokuSolver {
       }
     }
 
-    private boolean tryValid(int col, int row, BitSet inUse, boolean trace) {
+    private boolean tryValid(int col, int row, BitSet inUse, Trace trace) {
       int nextChoice = inUse.nextClearBit(1);
       while (nextChoice < TOTAL_CARDINALITY) {
-        if (trace) {
+        if (trace.enablePrinting) {
           System.out.println(
               "[solve] <" + col + ", " + row + "> trying " + nextChoice + " of " + inUse);
         }
         boolean result = fillCell(col, row, nextChoice);
         assert (result);
-        print();
+        if (trace.enablePrinting) {
+          print();
+        }
 
         // Test if the board is solved
         if (population.cardinality() == Board.COLS * Board.ROWS) {
-          if (trace) {
+          if (trace.enablePrinting) {
             System.out.println("[solve] Puzzle solved!");
           }
           return true;
         }
 
         // Try solving the rest of board with this choice
-        boolean trySolve = solve(trace);
+        boolean trySolve = innerSolve(trace);
         if (!trySolve) {
-          if (trace) {
+          trace.invalidGuesses++;
+          if (trace.enablePrinting) {
             System.out.println(
                 "[solve] <" + col + ", " + row + "> (try) failed with " + nextChoice);
           }
           clearCell(col, row);
           nextChoice = inUse.nextClearBit(nextChoice + 1);
         } else {
+          trace.validGuesses++;
           // A valid solution was found, move on to other cells
           return true;
         }
@@ -362,6 +383,34 @@ public class SodokuSolver {
     @Override
     public String toString() {
       return "<" + col + "," + row + ">";
+    }
+  }
+
+  static class Trace {
+    boolean enablePrinting;
+    boolean enableSummary;
+    int emptyCells;
+    int invalidGuesses;
+    int validGuesses;
+
+    Trace() {}
+
+    public static Trace none() {
+      return new Trace();
+    }
+
+    public static Trace full() {
+      Trace t = new Trace();
+      t.enablePrinting = true;
+      t.enableSummary = true;
+      return t;
+    }
+
+    public static Trace summary() {
+      Trace t = new Trace();
+      t.enablePrinting = false;
+      t.enableSummary = true;
+      return t;
     }
   }
 }
