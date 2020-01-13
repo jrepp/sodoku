@@ -1,10 +1,10 @@
-# Soduku Solver in Java
+# Sudoku Solver in Java
 
-A simple sodoku solver written in Java.
+A simple sudoku solver written in Java.
 
-[Solver](./src/main/java/com/jrepp/SodokuSolver.java)
+[Solver](./src/main/java/com/jrepp/SudokuSolver.java)
 
-[Tests](./src/test/java/com/jrepp/SodokuSolverTest.java)
+[Tests](./src/test/java/com/jrepp/SudokuSolverTest.java)
 
 
 ### Building
@@ -29,8 +29,8 @@ For each cell the set of viable answers is tried. For each valid choice the solv
 
 ```java
     String boardString = /* Use a comma separated list of 81 cells */
-    SodokuSolver.Board board = SododkuSolver.emptyBoard();
+    SudokuSolver.Board board = SudodkuSolver.emptyBoard();
     board.parseCSV(boardString);
-    board.solve(SodokuSolver.Trace.summary()); 
+    board.solve(SudokuSolver.Trace.summary()); 
     board.print();
 ```

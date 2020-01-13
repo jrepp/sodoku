@@ -30,7 +30,7 @@ dependencies {
     implementation "com.google.guava:guava:${versions.guava}"
 }
 
-mainClassName = 'com.jrepp.SodokuSolver'
+mainClassName = 'com.jrepp.SudokuSolver'
 
 test {
     useJUnitPlatform()

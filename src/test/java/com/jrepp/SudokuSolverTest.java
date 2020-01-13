@@ -7,8 +7,8 @@ import java.util.BitSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SodokuSolverTest {
-  SodokuSolver.Board board;
+public class SudokuSolverTest {
+  SudokuSolver.Board board;
 
   // https://www.websudoku.com/?level=1&set_id=8443424605
   static String EASY_1 =
@@ -48,7 +48,7 @@ public class SodokuSolverTest {
 
   @BeforeEach
   void setup() {
-    board = SodokuSolver.emptyBoard();
+    board = SudokuSolver.emptyBoard();
   }
 
   @Test
@@ -100,7 +100,7 @@ public class SodokuSolverTest {
   @Test
   void testClearCell() {
     board.fillCell(4, 4, 9);
-    BitSet block = SodokuSolver.Board.ruleSet();
+    BitSet block = SudokuSolver.Board.ruleSet();
     block.set(0);
     block.set(9);
     assertThat(board.blockSet(board.blockIndex(4, 4))).isEqualTo(block);
@@ -125,14 +125,14 @@ public class SodokuSolverTest {
   void testQueries() throws Exception {
     board.parseCSV(EASY_1);
     // do some queries around the solvable position at 4,4
-    BitSet col = SodokuSolver.Board.ruleSet();
+    BitSet col = SudokuSolver.Board.ruleSet();
     Arrays.stream("0, 0, 3, 0, 0, 0, 1, 0, 0".split("\\s*,\\s*"))
         .forEach((v) -> col.set(Integer.valueOf(v)));
-    BitSet row = SodokuSolver.Board.ruleSet();
+    BitSet row = SudokuSolver.Board.ruleSet();
     Arrays.stream("7, 4, 5,  1, 0, 8,  9, 6, 3".split("\\s*,\\s*"))
         .forEach((v) -> row.set(Integer.valueOf(v)));
     // block:
-    BitSet block = SodokuSolver.Board.ruleSet();
+    BitSet block = SudokuSolver.Board.ruleSet();
     Arrays.stream("3, 0, 0, 1, 0, 8, 0, 0, 6".split("\\s*,\\s*"))
         .forEach((v) -> block.set(Integer.valueOf(v)));
 
@@ -162,7 +162,7 @@ public class SodokuSolverTest {
   @Test
   void testSolveEasy() throws Exception {
     board.parseCSV(EASY_1);
-    boolean solved = board.solve(SodokuSolver.Trace.none());
+    boolean solved = board.solve(SudokuSolver.Trace.none());
     assertThat(solved).isTrue();
     board.print();
   }
@@ -170,14 +170,14 @@ public class SodokuSolverTest {
   @Test
   void testSolveMedium() throws Exception {
     board.parseCSV(MEDIUM_1);
-    boolean solved = board.solve(SodokuSolver.Trace.none());
+    boolean solved = board.solve(SudokuSolver.Trace.none());
     assertThat(solved).isTrue();
   }
 
   @Test
   void testSolveEvil() throws Exception {
     board.parseCSV(EVIL_1);
-    boolean solved = board.solve(SodokuSolver.Trace.full());
+    boolean solved = board.solve(SudokuSolver.Trace.full());
     assertThat(solved).isTrue();
   }
 }

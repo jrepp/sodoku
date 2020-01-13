@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class SodokuSolver {
+public class SudokuSolver {
   public static void main(String[] args) {
     Board board = new Board();
     board.print();
