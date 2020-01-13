@@ -55,18 +55,57 @@ public class SodokuSolver {
     // Write solver here
     public boolean solve(boolean trace) {
       boolean canSolve = true;
-      do {
-        // Find the next valid position to solve
-        CellPos pos = findSolvePosition(trace);
-        if (!pos.valid) {
-          break;
-        }
+      CellPos pos = new CellPos(0, 0, false, 0);
 
-        // Try all valid remaining moves
-        final BitSet inUse = allInUseAt(pos.col, pos.row);
-        if (!tryValid(pos.col, pos.row, inUse, trace)) {
-          break;
+      // Find the next valid position to solve
+      findSolvePosition(pos);
+      if (!pos.valid) {
+        System.out.println("[solve] no valid positions");
+        return false;
+      }
+
+      // Try all valid remaining moves
+      final BitSet inUse = allInUseAt(pos.col, pos.row);
+      return tryValid(pos.col, pos.row, inUse, trace);
+    }
+
+    private void findSolvePosition(CellPos pos) {
+      pos.set(0, 0, false, 0);
+
+      int bestCardinality = 0;
+      for (int row = 0; row < Board.ROWS; ++row) {
+        for (int col = 0; col < Board.COLS; ++col) {
+          if (get(col, row) != 0) {
+            continue;
+          }
+
+          BitSet inUse = allInUseAt(col, row);
+
+          // Find the cell with the highest number of known values,
+          // that still has a 0 (empty cell)
+          final int cardinality = inUse.cardinality();
+          if (cardinality > bestCardinality && cardinality < TOTAL_CARDINALITY && inUse.get(0)) {
+            bestCardinality = cardinality;
+            pos.set(col, row, true, cardinality);
+            if (cardinality == TOTAL_CARDINALITY - 1) {
+              // Only one choice, use it
+              return;
+            }
+          }
         }
+      }
+    }
+
+    private boolean tryValid(int col, int row, BitSet inUse, boolean trace) {
+      int nextChoice = inUse.nextClearBit(1);
+      while (nextChoice < TOTAL_CARDINALITY) {
+        if (trace) {
+          System.out.println(
+              "[solve] <" + col + ", " + row + "> trying " + nextChoice + " of " + inUse);
+        }
+        boolean result = fillCell(col, row, nextChoice);
+        assert (result);
+        print();
 
         // Test if the board is solved
         if (population.cardinality() == Board.COLS * Board.ROWS) {
@@ -75,49 +114,6 @@ public class SodokuSolver {
           }
           return true;
         }
-      } while (true);
-
-      return false;
-    }
-
-    private CellPos findSolvePosition(boolean trace) {
-      // Get the row with the highest number of known values
-      int bestRow = 0;
-      int bestCardinality = 0;
-      for (int row = 0; row < Board.ROWS; ++row) {
-        BitSet rowBits = population.get(row * 9, (row * 9) + 9);
-        final int cardinality = rowBits.cardinality();
-        if (cardinality > bestCardinality && cardinality < Board.COLS) {
-          bestCardinality = cardinality;
-          bestRow = row;
-        }
-      }
-      if (bestRow == 0 && bestCardinality == 0) {
-        return new CellPos(0, 0, false);
-      }
-      final BitSet rowPop = rowPopulation(bestRow);
-      final int nextCol = rowPop.nextClearBit(0);
-      if (trace) {
-        System.out.println(
-            "[solve] <"
-                + nextCol
-                + ", "
-                + bestRow
-                + "> found position with cardinality: "
-                + bestCardinality);
-      }
-      return new CellPos(nextCol, bestRow, true);
-    }
-
-    private boolean tryValid(int col, int row, BitSet inUse, boolean trace) {
-      int nextChoice = inUse.nextClearBit(0);
-      while (nextChoice < TOTAL_CARDINALITY) {
-        if (trace) {
-          System.out.println("[solve] <" + col + ", " + row + "> trying " + nextChoice + " of " + inUse);
-        }
-        boolean result = fillCell(col, row, nextChoice);
-        assert (result);
-        print();
 
         // Try solving the rest of board with this choice
         boolean trySolve = solve(trace);
@@ -129,12 +125,6 @@ public class SodokuSolver {
           clearCell(col, row);
           nextChoice = inUse.nextClearBit(nextChoice + 1);
         } else {
-          if (trace) {
-            System.out.println(
-                "[solve] <" + col + ", " + row + "> (try) passed with " + nextChoice);
-            print();
-          }
-
           // A valid solution was found, move on to other cells
           return true;
         }
@@ -289,12 +279,20 @@ public class SodokuSolver {
       return fillCell(x, y, b);
     }
 
+    private void setValue(BitSet set, int b) {
+      set.set(b);
+      if (set.size() == 10) {
+        set.clear(0);
+      }
+    }
+
     boolean fillCell(int x, int y, int b) {
       if (canFill(x, y, b)) {
         set(x, y, b);
-        rowRules.get(y).set(b);
-        colRules.get(x).set(b);
-        blockRules.get(blockIndex(x, y)).set(b);
+        setValue(rowRules.get(y), b);
+        setValue(colRules.get(x), b);
+        setValue(blockRules.get(blockIndex(x, y)), b);
+
         population.set((y * Board.COLS) + x);
         return true;
       }
@@ -345,11 +343,25 @@ public class SodokuSolver {
     int col;
     int row;
     boolean valid;
+    int cardinality;
 
-    CellPos(int c, int r, boolean v) {
+    CellPos(int c, int r, boolean v, int arity) {
       col = c;
       row = r;
       valid = v;
+      cardinality = arity;
+    }
+
+    void set(int c, int r, boolean v, int arity) {
+      col = c;
+      row = r;
+      valid = v;
+      cardinality = arity;
+    }
+
+    @Override
+    public String toString() {
+      return "<" + col + "," + row + ">";
     }
   }
 }

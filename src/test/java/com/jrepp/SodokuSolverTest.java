@@ -11,7 +11,7 @@ public class SodokuSolverTest {
   SodokuSolver.Board board;
 
   // https://www.websudoku.com/?level=1&set_id=8443424605
-  static String EXAMPLE_1 =
+  static String EASY_1 =
       "0, 1, 6,  0, 0, 2,  0, 0, 0,"
           + "0, 0, 0,  8, 0, 0,  0, 1, 0,"
           + "2, 0, 0,  0, 3, 0,  5, 0, 9,"
@@ -21,6 +21,30 @@ public class SodokuSolverTest {
           + "8, 0, 3,  0, 1, 0,  0, 0, 5,"
           + "0, 6, 0,  0, 0, 7,  0, 0, 0,"
           + "0, 0, 0,  9, 0, 0,  8, 2, 0";
+
+  // https://www.websudoku.com/?level=2&set_id=1938763555
+  static String MEDIUM_1 =
+      "0, 0, 8,  5, 0, 0,  0, 0, 6,"
+          + "0, 0, 1,  0, 7, 6,  0, 0, 0,"
+          + "0, 5, 9,  1, 4, 0,  0, 7, 0,"
+          + "0, 0, 4,  0, 0, 2,  0, 0, 0,"
+          + "5, 0, 0,  4, 0, 7,  0, 0, 2,"
+          + "0, 0, 0,  9, 0, 0,  4, 0, 0,"
+          + "0, 1, 0,  0, 9, 4,  5, 6, 0,"
+          + "0, 0, 0,  6, 8, 0,  3, 0, 0,"
+          + "7, 0, 0,  0, 0, 5,  9, 0, 0,";
+
+  // https://www.websudoku.com/?level=4&set_id=9372712401
+  static String EVIL_1 =
+      "1, 0, 0,  6, 0, 0,  9, 5, 0,"
+          + "0, 0, 0,  5, 0, 7,  0, 0, 0,"
+          + "0, 0, 0,  0, 3, 0,  0, 6, 0,"
+          + "0, 2, 0,  0, 0, 3,  0, 0, 8,"
+          + "0, 3, 9,  0, 0, 0,  6, 4, 0,"
+          + "4, 0, 0,  9, 0, 0,  0, 1, 0,"
+          + "0, 9, 0,  0, 7, 0,  0, 0, 0,"
+          + "0, 0, 0,  2, 0, 9,  0, 0, 0,"
+          + "0, 7, 8,  0, 0, 5,  0, 0, 9,";
 
   @BeforeEach
   void setup() {
@@ -34,9 +58,9 @@ public class SodokuSolverTest {
 
     int v = 9;
     int col = 8;
-    long rowValue = 0x555555;
+    long rowValue = 0x555555L;
     long setValue = ((long) v << (col * 4));
-    long maskValue = (0xfl << (col * 4));
+    long maskValue = (0xfL << (col * 4));
     assertThat((rowValue & maskValue)).isEqualTo(0);
 
     long newValue = setValue | rowValue;
@@ -94,12 +118,12 @@ public class SodokuSolverTest {
 
   @Test
   void testScenario1() throws Exception {
-    board.parseCSV(EXAMPLE_1);
+    board.parseCSV(EASY_1);
   }
 
   @Test
   void testQueries() throws Exception {
-    board.parseCSV(EXAMPLE_1);
+    board.parseCSV(EASY_1);
     // do some queries around the solvable position at 4,4
     BitSet col = SodokuSolver.Board.ruleSet();
     Arrays.stream("0, 0, 3, 0, 0, 0, 1, 0, 0".split("\\s*,\\s*"))
@@ -136,8 +160,24 @@ public class SodokuSolverTest {
   }
 
   @Test
-  void testSolve() throws Exception {
-    board.parseCSV(EXAMPLE_1);
-    assertThat(board.solve(true)).isTrue();
+  void testSolveEasy() throws Exception {
+    board.parseCSV(EASY_1);
+    boolean solved = board.solve(false);
+    assertThat(solved).isTrue();
+    board.print();
+  }
+
+  @Test
+  void testSolveMedium() throws Exception {
+    board.parseCSV(MEDIUM_1);
+    boolean solved = board.solve(false);
+    assertThat(solved).isTrue();
+  }
+
+  @Test
+  void testSolveEvil() throws Exception {
+    board.parseCSV(EVIL_1);
+    boolean solved = board.solve(true);
+    assertThat(solved).isTrue();
   }
 }
