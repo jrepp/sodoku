@@ -2,9 +2,15 @@
 
 A simple sodoku solver written in Java.
 
+[Solver](./src/main/java/com/jrepp/SodokuSolver.java)
+
+[Tests](./src/test/java/com/jrepp/SodokuSolverTest.java)
+
+
 ### Building
 
 ./gradlew  or gradlew.bat
+
 
 ### Explanation
 
@@ -17,6 +23,7 @@ Each row, column and block has a BitSet representing the numbers currently prese
 The solver finds the cell with the highest cardinality of known answers.
 
 For each cell the set of viable answers is tried. For each valid choice the solver recurses.
+
 
 ### Example usage
 
