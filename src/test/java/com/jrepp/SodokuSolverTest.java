@@ -177,7 +177,7 @@ public class SodokuSolverTest {
   @Test
   void testSolveEvil() throws Exception {
     board.parseCSV(EVIL_1);
-    boolean solved = board.solve(SodokuSolver.Trace.summary());
+    boolean solved = board.solve(SodokuSolver.Trace.full());
     assertThat(solved).isTrue();
   }
 }
