@@ -83,31 +83,30 @@ public class SudokuSolver {
       }
 
       // Try all valid remaining moves
-      final BitSet inUse = allInUseAt(pos.col, pos.row);
+      BitSet inUse = ruleSet();
+      allInUseAt(pos.col, pos.row, inUse);
       return tryValid(pos.col, pos.row, inUse, trace);
     }
 
+    // Find the cell with the highest number of known values, that still has an empty cell
     private void findSolvePosition(CellPos pos) {
       pos.set(0, 0, false, 0);
-
       int bestCardinality = 0;
-      for (int row = 0; row < Board.ROWS; ++row) {
-        for (int col = 0; col < Board.COLS; ++col) {
-          if (get(col, row) != 0) {
-            continue;
-          }
-
-          // Find the cell with the highest number of known values,
-          // that still has a 0 (empty cell)
-          final BitSet inUse = allInUseAt(col, row);
-          final int cardinality = inUse.cardinality();
-          if (cardinality > bestCardinality && cardinality < TOTAL_CARDINALITY && inUse.get(0)) {
-            bestCardinality = cardinality;
-            pos.set(col, row, true, cardinality);
-            if (cardinality == TOTAL_CARDINALITY - 1) {
-              // Only one choice, use it
-              return;
-            }
+      BitSet inUse = ruleSet();
+      final int maxPopulation = Board.ROWS * Board.COLS;
+      for (int nextCell = population.nextClearBit(0);
+          nextCell < maxPopulation;
+          nextCell = population.nextClearBit(nextCell + 1)) {
+        final int col = nextCell % Board.COLS;
+        final int row = nextCell / Board.ROWS;
+        allInUseAt(col, row, inUse);
+        final int cardinality = inUse.cardinality();
+        if (cardinality > bestCardinality && cardinality < TOTAL_CARDINALITY && inUse.get(0)) {
+          bestCardinality = cardinality;
+          pos.set(col, row, true, cardinality);
+          if (cardinality == TOTAL_CARDINALITY - 1) {
+            // Only one choice, use it
+            return;
           }
         }
       }
@@ -154,8 +153,7 @@ public class SudokuSolver {
       return false;
     }
 
-    public BitSet allInUseAt(int col, int row) {
-      BitSet inUse = new BitSet();
+    BitSet allInUseAt(int col, int row, BitSet inUse) {
       inUse.or(rowRules.get(row));
       inUse.or(colRules.get(col));
       inUse.or(blockRules.get(blockIndex(col, row)));

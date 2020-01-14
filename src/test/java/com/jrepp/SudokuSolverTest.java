@@ -46,6 +46,28 @@ public class SudokuSolverTest {
           + "0, 0, 0,  2, 0, 9,  0, 0, 0,"
           + "0, 7, 8,  0, 0, 5,  0, 0, 9,";
 
+  static String ARTO_INKALA =
+      "8,	0, 0,  0, 0, 0,  0, 0, 0,"
+          + "0,	0, 3,  6, 0, 0,  0, 0, 0,"
+          + "0,	7, 0,  0, 9, 0,  2, 0, 0,"
+          + "0,	5, 0,  0, 0, 7,  0, 0, 0,"
+          + "0,	0, 0,  0, 4, 5,  7, 0, 0,"
+          + "0,	0, 0,  1, 0, 0,  0, 3, 0,"
+          + "0,	0, 1,  0, 0, 0,  0, 6, 8,"
+          + "0,	0, 8,  5, 0, 0,  0, 1, 0,"
+          + "0,	9, 0,  0, 0, 0,  4, 0, 0,";
+
+  static String UNSOLVABLE_28_DAVE_FILMER =
+      "6, 0, 0,  0, 0, 8,  9, 4, 0,"
+          + "9, 0, 0,  0, 0, 6,  1, 0, 0,"
+          + "0, 7, 0,  0, 4, 0,  0, 0, 0,"
+          + "2, 0, 0,  6, 1, 0,  0, 0, 0,"
+          + "0, 0, 0,  0, 0, 0,  2, 0, 0,"
+          + "0, 8, 9,  0, 0, 2,  0, 0, 0,"
+          + "0, 0, 0,  0, 6, 0,  0, 0, 5,"
+          + "0, 0, 0,  0, 0, 0,  0, 3, 0,"
+          + "8, 0, 0,  0, 0, 1,  6, 0, 0,";
+
   @BeforeEach
   void setup() {
     board = SudokuSolver.emptyBoard();
@@ -150,7 +172,8 @@ public class SudokuSolverTest {
     assertThat(block.nextClearBit(0)).isEqualTo(2);
     assertThat(block.nextClearBit(3)).isEqualTo(4);
 
-    BitSet allSet = board.allInUseAt(4, 4);
+    BitSet allSet = board.ruleSet();
+    board.allInUseAt(4, 4, allSet);
     assertThat(allSet.cardinality()).isEqualTo(9);
     assertThat(allSet.nextClearBit(0)).isEqualTo(2);
 
@@ -177,7 +200,21 @@ public class SudokuSolverTest {
   @Test
   void testSolveEvil() throws Exception {
     board.parseCSV(EVIL_1);
-    boolean solved = board.solve(SudokuSolver.Trace.full());
+    boolean solved = board.solve(SudokuSolver.Trace.summary());
+    assertThat(solved).isTrue();
+  }
+
+  @Test
+  void testWorldsHardest() throws Exception {
+    board.parseCSV(ARTO_INKALA);
+    boolean solved = board.solve(SudokuSolver.Trace.summary());
+    assertThat(solved).isTrue();
+  }
+
+  @Test
+  void testWorldsHardest2() throws Exception {
+    board.parseCSV(UNSOLVABLE_28_DAVE_FILMER);
+    boolean solved = board.solve(SudokuSolver.Trace.summary());
     assertThat(solved).isTrue();
   }
 }
